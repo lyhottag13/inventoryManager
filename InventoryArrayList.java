@@ -1,7 +1,6 @@
 import java.util.ArrayList;
-import java.util.Iterator;
 
-public class InventoryArrayList<E> extends ArrayList<Inventory>{
+public class InventoryArrayList {
     private ArrayList<Inventory> list;
     
     public InventoryArrayList() {
@@ -32,14 +31,14 @@ public class InventoryArrayList<E> extends ArrayList<Inventory>{
         }
         return -1;
     }
+    public int size()  {
+        return list.size();
+    }
     public String toString() {
         StringBuilder output = new StringBuilder();
         for (Inventory i : list) {
             output.append(i + "\n");
         }
         return output.toString();
-    }
-    public Iterator<Inventory> iterator() {
-            return list.iterator();
     }
 }

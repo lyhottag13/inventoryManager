@@ -8,19 +8,17 @@ import java.io.File;
 
 public class InventoryGUI extends JFrame implements ActionListener {
     private DefaultListModel<Inventory> listModel;
-    private InventoryArrayList<Inventory> inventoryArrayList;
-    private InventoryHashMap inventoryHashMap;
+    private InventoryArrayList inventoryArrayList;
     private JFrame frame;
     private JPanel backgroundPanel, fieldPanel, buttonPanel, panePanel;
     private JTextField nameField, IDField, categoryField, quantityField, priceField;
     private JList<Inventory> list;
     private JLabel[] fieldLabels;
-    private JButton newButton, deselectButton, editButton, deleteButton;
+    private JButton newButton, deselectButton, editButton, removeButton;
 
     public InventoryGUI() {
         listModel = new DefaultListModel<Inventory>();
-        inventoryHashMap = new InventoryHashMap();
-        inventoryArrayList = new InventoryArrayList<Inventory>();
+        inventoryArrayList = new InventoryArrayList();
         fillList();
         frame = new JFrame("Inventory Manager");
         backgroundPanel = new JPanel(new FlowLayout());
@@ -41,14 +39,13 @@ public class InventoryGUI extends JFrame implements ActionListener {
         newButton = new JButton("New");
         deselectButton = new JButton("Deselect");
         editButton = new JButton("Overwrite");
-        deleteButton = new JButton("Delete");
+        removeButton = new JButton("Delete");
 
         fieldLabels[0].setText("Name:");
         fieldLabels[1].setText("ID:");
         fieldLabels[2].setText("Category:");
         fieldLabels[3].setText("Quantity:");
         fieldLabels[4].setText("Price:");
-
         fieldPanel.add(nameField);
         fieldPanel.add(IDField);
         fieldPanel.add(categoryField);
@@ -58,22 +55,20 @@ public class InventoryGUI extends JFrame implements ActionListener {
         buttonPanel.add(newButton);
         buttonPanel.add(deselectButton);
         buttonPanel.add(editButton);
-        buttonPanel.add(deleteButton);
+        buttonPanel.add(removeButton);
 
         panePanel.add(list);
 
         newButton.addActionListener(this);
         deselectButton.addActionListener(this);
         editButton.addActionListener(this);
-        deleteButton.addActionListener(this);
+        removeButton.addActionListener(this);
 
         // I'll be honest, I had no clue how to implement the whole 'show the JList object in the fields' method. I needed to look this stuff up online.
         list.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                int selectedKey = list.getSelectedValue().getIndex();
-                Inventory selectedItem = inventoryHashMap.get(selectedKey);
-                
-                if (selectedItem != null) {
+                Inventory selectedItem = list.getSelectedValue();            
+                                if (selectedItem != null) {
                     nameField.setText(selectedItem.getName());
                     IDField.setText(selectedItem.getID());
                     categoryField.setText(selectedItem.getCategory());
@@ -83,7 +78,6 @@ public class InventoryGUI extends JFrame implements ActionListener {
             }
         });
         System.out.println();
-        System.out.println(inventoryHashMap);
         frame.add(backgroundPanel);
         backgroundPanel.add(fieldPanel);
         backgroundPanel.add(buttonPanel);
@@ -109,8 +103,7 @@ public class InventoryGUI extends JFrame implements ActionListener {
             list.clearSelection();
         } else if (event.getSource() == editButton) {
             list.getSelectedIndex();
-            // listModel.
-        } else if (event.getSource() == deleteButton) {
+        } else if (event.getSource() == removeButton) {
             try {
                 removeInventory();
             } catch (Exception e) {}
@@ -123,12 +116,10 @@ public class InventoryGUI extends JFrame implements ActionListener {
     public void addInventory(Inventory inventory) {
         inventoryArrayList.addInventory(inventory);
         inventory.setIndex(inventoryArrayList.indexOf(inventory));
-        inventoryHashMap.addInventory(inventory);
         listModel.addElement(inventory);
     }
     public void removeInventory() {
         inventoryArrayList.removeInventory(list.getSelectedIndex());
-        inventoryHashMap.removeInventory(list.getSelectedValue().getIndex());
         listModel.removeElement(list.getSelectedValue());
         InventoryIO.rewrite(inventoryArrayList);
     }

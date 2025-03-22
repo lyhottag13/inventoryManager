@@ -9,11 +9,11 @@ public class InventoryIO {
             exception.printStackTrace();
         }
     }
-    public static void rewrite(InventoryArrayList<Inventory> list) {
+    public static void rewrite(InventoryArrayList list) {
         try (FileWriter writer = new FileWriter("Inventory.txt")) {
-            for (Inventory i : list) {
-                write(writer, i);
-            } 
+            for (int i = 0; i < list.size(); i++) {
+                write(writer, list.getInventory(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
