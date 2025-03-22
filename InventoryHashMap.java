@@ -1,17 +1,24 @@
 import java.util.HashMap;
 public class InventoryHashMap {
-    private HashMap<String, Inventory> hashMap;
+    private HashMap<Integer, Inventory> hashMap;
     public InventoryHashMap() {
-        hashMap = new HashMap<String, Inventory>();
+        hashMap = new HashMap<Integer, Inventory>();
     }
     
-    public void addHash(Inventory inventory) {
-        hashMap.put(inventory.toString(), inventory);
+    public void addInventory(Inventory inventory) {
+        System.out.println(inventory);
+        hashMap.put(inventory.getIndex(), inventory);
     }
-    public HashMap<String, Inventory> getHashMap() {
+    public void removeInventory(int inventoryIndex) {
+        hashMap.remove(inventoryIndex);
+    }
+    public HashMap<Integer, Inventory> getHashMap() {
         return hashMap;
     }
-    public Inventory get(String key) {
-        return hashMap.get(key);
+    public Inventory get(int index) {
+        return hashMap.get(index);
+    }
+    public String toString() {
+        return hashMap.toString();
     }
 }

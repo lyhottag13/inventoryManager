@@ -7,20 +7,20 @@ import java.util.Scanner;
 import java.io.File;
 
 public class InventoryGUI extends JFrame implements ActionListener {
-    private DefaultListModel<String> listModel;
-    private InventoryArrayList<Inventory> inventoryList;
+    private DefaultListModel<Inventory> listModel;
+    private InventoryArrayList<Inventory> inventoryArrayList;
     private InventoryHashMap inventoryHashMap;
     private JFrame frame;
     private JPanel backgroundPanel, fieldPanel, buttonPanel, panePanel;
     private JTextField nameField, IDField, categoryField, quantityField, priceField;
-    private JList<String> list;
+    private JList<Inventory> list;
     private JLabel[] fieldLabels;
-    private JButton newButton;
+    private JButton newButton, deselectButton, editButton, deleteButton;
 
     public InventoryGUI() {
-        listModel = new DefaultListModel<String>();
+        listModel = new DefaultListModel<Inventory>();
         inventoryHashMap = new InventoryHashMap();
-        inventoryList = new InventoryArrayList<Inventory>();
+        inventoryArrayList = new InventoryArrayList<Inventory>();
         fillList();
         frame = new JFrame("Inventory Manager");
         backgroundPanel = new JPanel(new FlowLayout());
@@ -32,13 +32,16 @@ public class InventoryGUI extends JFrame implements ActionListener {
         categoryField = new JTextField(5);
         quantityField = new JTextField(5);
         priceField = new JTextField(5);
-        list = new JList<String>(listModel);
+        list = new JList<Inventory>(listModel);
         fieldLabels = new JLabel[5];
         for (int i = 0; i < fieldLabels.length; i++) {
             fieldLabels[i] = new JLabel("", SwingConstants.CENTER);
             fieldPanel.add(fieldLabels[i]);
         }
         newButton = new JButton("New");
+        deselectButton = new JButton("Deselect");
+        editButton = new JButton("Overwrite");
+        deleteButton = new JButton("Delete");
 
         fieldLabels[0].setText("Name:");
         fieldLabels[1].setText("ID:");
@@ -53,15 +56,21 @@ public class InventoryGUI extends JFrame implements ActionListener {
         fieldPanel.add(priceField);
 
         buttonPanel.add(newButton);
+        buttonPanel.add(deselectButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
 
         panePanel.add(list);
 
         newButton.addActionListener(this);
+        deselectButton.addActionListener(this);
+        editButton.addActionListener(this);
+        deleteButton.addActionListener(this);
 
         // I'll be honest, I had no clue how to implement the whole 'show the JList object in the fields' method. I needed to look this stuff up online.
         list.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                String selectedKey = list.getSelectedValue();
+                int selectedKey = list.getSelectedValue().getIndex();
                 Inventory selectedItem = inventoryHashMap.get(selectedKey);
                 
                 if (selectedItem != null) {
@@ -73,7 +82,8 @@ public class InventoryGUI extends JFrame implements ActionListener {
                 }
             }
         });
-
+        System.out.println();
+        System.out.println(inventoryHashMap);
         frame.add(backgroundPanel);
         backgroundPanel.add(fieldPanel);
         backgroundPanel.add(buttonPanel);
@@ -89,38 +99,53 @@ public class InventoryGUI extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == newButton) {
             try {
-                String name = nameField.getText();
-                String ID = IDField.getText();
-                String category = categoryField.getText();
-                int quantity = Integer.parseInt(quantityField.getText());
-                double price = Double.parseDouble(priceField.getText());
-                Inventory list = new Inventory(name, ID, category, quantity, price);
-                inventoryList.addInventory(list);
-                InventoryIO.enterInventory(list);
-                inventoryHashMap.addHash(list);
-                listModel.addElement(list.toString());
+                Inventory newInventory = new Inventory(nameField.getText(), IDField.getText(), categoryField.getText(), Integer.parseInt(quantityField.getText()), Double.parseDouble(priceField.getText()));
+                addInventory(newInventory);
+                InventoryIO.writeInventoryToFile(newInventory);
             } catch (Exception exception) {
                 System.err.println("OOPS!");
             }
+        } else if (event.getSource() == deselectButton) {
+            list.clearSelection();
+        } else if (event.getSource() == editButton) {
+            list.getSelectedIndex();
+            // listModel.
+        } else if (event.getSource() == deleteButton) {
+            try {
+                removeInventory();
+            } catch (Exception e) {}
         }
     }
-    // Fills the list with the inventory objects from the txt file.
+    /**
+     * Adds an inventory object to all the necessary areas to shorten the code required in other methods.
+     * @param inventory The inventory object that will be added to the different lists.
+     */
+    public void addInventory(Inventory inventory) {
+        inventoryArrayList.addInventory(inventory);
+        inventory.setIndex(inventoryArrayList.indexOf(inventory));
+        inventoryHashMap.addInventory(inventory);
+        listModel.addElement(inventory);
+    }
+    public void removeInventory() {
+        inventoryArrayList.removeInventory(list.getSelectedIndex());
+        inventoryHashMap.removeInventory(list.getSelectedValue().getIndex());
+        listModel.removeElement(list.getSelectedValue());
+        InventoryIO.rewrite(inventoryArrayList);
+    }
+    /**
+     * Fills the necessary lists from Inventory.txt to make the inventory interactable.
+     */
     public void fillList() {
         try (Scanner scan = new Scanner(new File("Inventory.txt"))) {
             scan.useDelimiter("\n");
-            String line;
             while (scan.hasNext()) {
-                line = scan.next();
-                Scanner scan2 = new Scanner(line);
-                scan2.useDelimiter(" ");
+                Scanner scan2 = new Scanner(scan.next());
+                scan2.useDelimiter("#PROPERTYBREAK#");
                 Inventory temporary = new Inventory(scan2.next(), scan2.next(), scan2.next(), Integer.parseInt(scan2.next()), Double.parseDouble(scan2.next()));
-                inventoryList.addInventory(temporary);
-                inventoryHashMap.addHash(temporary);
-                listModel.addElement(temporary.toString());
+                addInventory(temporary);
                 scan2.close();
             }
         } catch (Exception e) {
-            System.err.println("IO Error");
             e.printStackTrace();
         }
     }

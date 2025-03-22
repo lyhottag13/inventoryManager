@@ -4,6 +4,7 @@ public class Inventory {
     private String category;
     private int quantity;
     private double price;
+    private int index = 0;
     public Inventory(String name, String ID, String category, int quantity, double price) {
         this.name = name;
         this.ID = ID;
@@ -26,6 +27,9 @@ public class Inventory {
     public double getPrice() {
         return price;
     }
+    public int getIndex() {
+        return index;
+    }
     public void setName(String name) {
         this.name = name;
     }
@@ -40,6 +44,9 @@ public class Inventory {
     }
     public void setPrice(double price) {
         this.price = price;
+    }
+    public void setIndex(int index) {
+        this.index = index;
     }
     public String toString() {
         return name + " " + ID + " " + category + " " + quantity + " " + price;
