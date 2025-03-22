@@ -23,6 +23,10 @@ public class InventoryArrayList {
         current.setQuantity(quantity);
         current.setPrice(price);
     }
+    public void replace(int index, Inventory inventory) {
+        list.remove(index);
+        list.add(index, inventory);
+    }
     public int indexOf(Inventory inventory) {
         for (int i = 0; i < list.size(); i++) {
             if (inventory == list.get(i)) {

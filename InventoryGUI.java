@@ -77,7 +77,6 @@ public class InventoryGUI extends JFrame implements ActionListener {
                 }
             }
         });
-        System.out.println();
         frame.add(backgroundPanel);
         backgroundPanel.add(fieldPanel);
         backgroundPanel.add(buttonPanel);
@@ -91,22 +90,21 @@ public class InventoryGUI extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (event.getSource() == newButton) {
-            try {
+        try {
+            if (event.getSource() == newButton) {
                 Inventory newInventory = new Inventory(nameField.getText(), IDField.getText(), categoryField.getText(), Integer.parseInt(quantityField.getText()), Double.parseDouble(priceField.getText()));
                 addInventory(newInventory);
                 InventoryIO.writeInventoryToFile(newInventory);
-            } catch (Exception exception) {
-                System.err.println("OOPS!");
+            } else if (event.getSource() == deselectButton) {
+                list.clearSelection();
+            } else if (event.getSource() == editButton) {
+                Inventory newInventory = new Inventory(nameField.getText(), IDField.getText(), categoryField.getText(), Integer.parseInt(quantityField.getText()), Double.parseDouble(priceField.getText()));
+                editInventory(list.getSelectedIndex(), newInventory);
+            } else if (event.getSource() == removeButton) {
+                removeInventory(list.getSelectedIndex());
             }
-        } else if (event.getSource() == deselectButton) {
-            list.clearSelection();
-        } else if (event.getSource() == editButton) {
-            list.getSelectedIndex();
-        } else if (event.getSource() == removeButton) {
-            try {
-                removeInventory();
-            } catch (Exception e) {}
+        } catch (Exception exception) {
+            System.err.println("Oops!");
         }
     }
     /**
@@ -118,9 +116,23 @@ public class InventoryGUI extends JFrame implements ActionListener {
         inventory.setIndex(inventoryArrayList.indexOf(inventory));
         listModel.addElement(inventory);
     }
-    public void removeInventory() {
-        inventoryArrayList.removeInventory(list.getSelectedIndex());
-        listModel.removeElement(list.getSelectedValue());
+    /**
+     * Edits an already-existing inventory item to updated values provided by the user.
+     * @param inventory The inventory object that will overwrite the previous inventory item.
+     */
+    public void editInventory(int index, Inventory inventory) {
+        inventoryArrayList.replace(index, inventory);
+        listModel.remove(index);
+        listModel.add(index, inventory);
+        InventoryIO.rewrite(inventoryArrayList);
+    }
+    /**
+     * Removes an inventory object from any point in the list.
+     * @param index The index that the user wants to remove.
+     */
+    public void removeInventory(int index) {
+        inventoryArrayList.removeInventory(index);
+        listModel.remove(index);    
         InventoryIO.rewrite(inventoryArrayList);
     }
     /**
